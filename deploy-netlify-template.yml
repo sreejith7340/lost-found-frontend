@@ -1,0 +1,38 @@
+name: Deploy Frontend to Netlify
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_DIR: build
+        run: |
+          npx netlify-cli deploy --dir=$NETLIFY_DIR --prod --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN
+
+# Notes:
+# - Adjust `NETLIFY_DIR` if your publish directory is `dist` or other.
+# - Add `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` to repository Secrets.
